@@ -6,6 +6,13 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
+// testing: dependencies
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+import express from "express";
+const app = express();
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
 // load environment variables from .env
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -17,17 +24,69 @@ const URL = process.env.MONGO_URL;
 // function to connect to Mongo DB
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-const connectDB = async () => {
+const connectDb = async () => {
   try {
     await mongoose.connect(URL);
-    console.log("Connected to mongoose");
+    console.log("Connected to mongo DB via mongoose");
   } catch (error) {
     console.log("Error in connecting to Mongo DB", error);
   }
 };
 
+// connectDb();
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
-// export the connectDB function to make it accessible from other modules
+// schema
+//////////////////////////////////////////////////////////////////////////////////////////////////
+const shipwreckSchema = new mongoose.Schema({
+  feature_type: {
+    type: String,
+    require: true,
+  },
+  chart: {
+    type: String,
+    required: true,
+  },
+  latdec: {
+    type: Number,
+    required: true,
+  },
+  londec: {
+    type: Number,
+    required: true,
+  },
+  coordinates: {
+    type: Number,
+  },
+});
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// pre-save hook to assign the coordinates value
+//////////////////////////////////////////////////////////////////////////////////////////////////
+shipwreckSchema.pre("save", function (next) {
+  if (this.latdec !== undefined && this.londec !== undefined) {
+    this.coordinates = [this.londec, this.latdec];
+  }
+  next();
+});
+
+const Shipwrecks = mongoose.model("Shipwrecks", shipwreckSchema);
+
+let oneDoc;
+
+const retrieveDoc = async () => {
+  try {
+    oneDoc = await Shipwrecks.findOne({ feature_type: "Wrecks - Visible" });
+    console.log(oneDoc);
+  } catch (error) {
+    console.log("Error in retrieving data", error);
+  }
+};
+
+retrieveDoc();
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// export the connectDb function to make it accessible from other modules
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-export default connectDB;
+export { connectDb, oneDoc };

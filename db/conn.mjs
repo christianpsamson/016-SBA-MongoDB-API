@@ -33,60 +33,8 @@ const connectDb = async () => {
   }
 };
 
-// connectDb();
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-// schema
-//////////////////////////////////////////////////////////////////////////////////////////////////
-const shipwreckSchema = new mongoose.Schema({
-  feature_type: {
-    type: String,
-    require: true,
-  },
-  chart: {
-    type: String,
-    required: true,
-  },
-  latdec: {
-    type: Number,
-    required: true,
-  },
-  londec: {
-    type: Number,
-    required: true,
-  },
-  coordinates: {
-    type: Number,
-  },
-});
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-// pre-save hook to assign the coordinates value
-//////////////////////////////////////////////////////////////////////////////////////////////////
-shipwreckSchema.pre("save", function (next) {
-  if (this.latdec !== undefined && this.londec !== undefined) {
-    this.coordinates = [this.londec, this.latdec];
-  }
-  next();
-});
-
-const Shipwrecks = mongoose.model("Shipwrecks", shipwreckSchema);
-
-let oneDoc;
-
-const retrieveDoc = async () => {
-  try {
-    oneDoc = await Shipwrecks.findOne({ feature_type: "Wrecks - Visible" });
-    console.log(oneDoc);
-  } catch (error) {
-    console.log("Error in retrieving data", error);
-  }
-};
-
-retrieveDoc();
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // export the connectDb function to make it accessible from other modules
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-export { connectDb, oneDoc };
+export default connectDb;
